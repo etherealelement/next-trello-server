@@ -1,6 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ConfigService } from "@nestjs/config";
+import { ValidationPipe } from "@nestjs/common";
 
 import * as cookieParser from "cookie-parser";
 
@@ -9,9 +10,21 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
 
-  app.use(cookieParser(config.getOrThrow("COOKIES_SECRET")));
+  app.use(cookieParser(config.getOrThrow<string>("COOKIES_SECRET")));
 
-  await app.listen(process.env.PORT ?? 3000);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
+
+  app.enableCors({
+    origin: config.getOrThrow<string>("ALLOWED_ORIGIN"),
+    credentials: true,
+    exposedHeaders: ["set-cookie"],
+  });
+
+  await app.listen(config.getOrThrow<number>("APPLICATION_PORT"));
 }
 
 bootstrap();
