@@ -21,7 +21,7 @@ services:
     image: redis:5.0
     restart: always
     ports:
-      - 8488:8488
+      - 6379:6379
     command: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
